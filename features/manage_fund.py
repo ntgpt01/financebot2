@@ -212,10 +212,10 @@ async def fund_menu(query: CallbackQuery):
     await query.answer()
     keyboard = InlineKeyboardMarkup(row_width=2)
     keyboard.add(
-        InlineKeyboardButton("📅 Ghi nhận Quũ", callback_data="fund_record"),
-        InlineKeyboardButton("📊 Báo Cáo Quũ", callback_data="fund_report")
+        InlineKeyboardButton("📅 Ghi nhận Quỹ", callback_data="fund_record"),
+        InlineKeyboardButton("📊 Báo Cáo Quỹ", callback_data="fund_report")
     )
-    await query.message.edit_text("💰 Chọn chức năng quản lý quũ:", reply_markup=keyboard)
+    await query.message.edit_text("💰 Chọn chức năng quản lý Quỹ:", reply_markup=keyboard)
 
 async def handle_fund_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
@@ -227,8 +227,8 @@ async def handle_fund_callback(query: CallbackQuery, state: FSMContext):
 async def select_type(message: types.Message):
     keyboard = InlineKeyboardMarkup(row_width=2)
     keyboard.add(
-        InlineKeyboardButton("🟢 Thu Quũ", callback_data="type_thu"),
-        InlineKeyboardButton("🔴 Chi Quũ", callback_data="type_chi")
+        InlineKeyboardButton("🟢 Thu Quỹ", callback_data="type_thu"),
+        InlineKeyboardButton("🔴 Chi Quỹ", callback_data="type_chi")
     )
     await message.edit_text("Chọn loại giao dịch:", reply_markup=keyboard)
     await FundState.choosing_type.set()
