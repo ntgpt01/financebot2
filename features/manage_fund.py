@@ -343,47 +343,47 @@ async def fund_report(message: types.Message):
 
     # await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
     async def fund_report(message: types.Message):
-   txs = get_transactions()
+        txs = get_transactions()
 
-    if not txs:
-        await message.answer("📭 Hiện chưa có giao dịch nào.")
-        return
+        if not txs:
+            await message.answer("📭 Hiện chưa có giao dịch nào.")
+            return
 
-    # Tổng thu – chi
-    thu = sum(t['amount'] for t in txs if t['type'] == 'Thu')
-    chi = sum(t['amount'] for t in txs if t['type'] == 'Chi')
-    sodu = thu - chi
-    acc_balance = {}
-    for t in txs:
-        acc = t['account']
-        amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
-        acc_balance[acc] = acc_balance.get(acc, 0) + amt
+        # Tổng thu – chi
+        thu = sum(t['amount'] for t in txs if t['type'] == 'Thu')
+        chi = sum(t['amount'] for t in txs if t['type'] == 'Chi')
+        sodu = thu - chi
+        acc_balance = {}
+        for t in txs:
+            acc = t['account']
+            amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
+            acc_balance[acc] = acc_balance.get(acc, 0) + amt
 
 
-    msg = "📉 Tổng Hợp Thu Chi\n"
-    msg += "Loại | Số tiền\n"
-    msg += "-------------------------\n"
-    msg += f"🟢 Thu  | {thu:,} VNĐ\n"
-    msg += f"🔴 Chi  | {chi:,} VNĐ\n"
-    msg += f"💰 Số dư | {sodu:,} VNĐ\n\n"
+        msg = "📉 Tổng Hợp Thu Chi\n"
+        msg += "Loại | Số tiền\n"
+        msg += "-------------------------\n"
+        msg += f"🟢 Thu  | {thu:,} VNĐ\n"
+        msg += f"🔴 Chi  | {chi:,} VNĐ\n"
+        msg += f"💰 Số dư | {sodu:,} VNĐ\n\n"
 
-    msg += "💼 Số Dư Theo Nguồn Tiền\n"
-    msg += "-------------------------\n"
-    acc_balance = {acc: 0 for acc in data['accounts']}
-    for t in data['transactions']:
-        amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
-        acc_balance[t['account']] = acc_balance.get(t['account'], 0) + amt
-    for acc, val in acc_balance.items():
-        msg += f"🏦 {acc:<6} : 💰 {val:,} VNĐ\n"
+        msg += "💼 Số Dư Theo Nguồn Tiền\n"
+        msg += "-------------------------\n"
+        acc_balance = {acc: 0 for acc in data['accounts']}
+        for t in data['transactions']:
+            amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
+            acc_balance[t['account']] = acc_balance.get(t['account'], 0) + amt
+        for acc, val in acc_balance.items():
+            msg += f"🏦 {acc:<6} : 💰 {val:,} VNĐ\n"
 
-    msg += "\n🧾 Lịch Sử Quỹ:\n"
-    msg += "-------------------------\n"
-    msg += "ID | Time      | Type | Amount | Mem\n"
-    for i, t in enumerate(data["transactions"], 1):
-        icon = "🟢 T" if t["type"] == "Thu" else "🔴 C"
-        msg += f"{i:02} | {t['time']} | {icon} | {t['amount']:,} | 👤 {t['member']}\n"
+        msg += "\n🧾 Lịch Sử Quỹ:\n"
+        msg += "-------------------------\n"
+        msg += "ID | Time      | Type | Amount | Mem\n"
+        for i, t in enumerate(data["transactions"], 1):
+            icon = "🟢 T" if t["type"] == "Thu" else "🔴 C"
+            msg += f"{i:02} | {t['time']} | {icon} | {t['amount']:,} | 👤 {t['member']}\n"
 
-    await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
+        await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
 
 
 async def add_account_handler(message: types.Message, state: FSMContext):

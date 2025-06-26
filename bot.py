@@ -54,6 +54,10 @@ def set_webhook():
         return f"✅ Webhook đã được set về: {WEBHOOK_URL}"
     except Exception as e:
         return f"❌ Lỗi khi set webhook: {str(e)}"
+@dp.message_handler()
+async def echo(message: types.Message):
+    print(f"Chat ID: {message.chat.id}")
+    await message.reply("Đã ghi nhận nhóm.")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
