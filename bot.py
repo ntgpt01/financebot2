@@ -51,9 +51,11 @@ async def on_startup():
     await bot.set_webhook(WEBHOOK_URL)
 
 @app.route("/setwebhook", methods=["GET"])
-async def set_webhook():
-    await bot.set_webhook(WEBHOOK_URL)
+def set_webhook():
+    import asyncio
+    asyncio.run(bot.set_webhook(WEBHOOK_URL))
     return f"Webhook set to {WEBHOOK_URL}"
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
