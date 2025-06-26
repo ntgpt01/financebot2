@@ -40,19 +40,30 @@ def index():
     return "FinanceBot is alive!"
 
 @app.route(WEBHOOK_PATH, methods=["POST"])
-async def webhook():
-    request_data = request.get_json()
-    update = Update(**request_data)
-    await dp.process_update(update)
-    return "ok"
-
-
+# async def webhook():
+#     request_data = request.get_json()
+#     update = Update(**request_data)
+#     await dp.process_update(update)
+#     return "ok"
+@app.route(WEBHOOK_PATH, methods=["POST"])
+def webhook():
+    try:
+        request_data = request.get_json()
+        update = Update(**request_data)
+        import asyncio
+        asyncio.run(dp.process_update(update))
+        return "✅ Update processed", 200
+    except Exception as e:
+        return f"❌ Error in webhook: {str(e)}", 500
 
 @app.route("/setwebhook", methods=["GET"])
 def set_webhook():
     import asyncio
-    asyncio.run(bot.set_webhook(WEBHOOK_URL))
-    return f"Webhook set to {WEBHOOK_URL}"
+    try:
+        asyncio.run(bot.set_webhook(WEBHOOK_URL))
+        return f"✅ Webhook đã được set về: {WEBHOOK_URL}"
+    except Exception as e:
+        return f"❌ Lỗi khi set webhook: {str(e)}"
 
 
 if __name__ == "__main__":
