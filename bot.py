@@ -46,9 +46,7 @@ async def webhook():
     await dp.process_update(update)
     return "ok"
 
-@app.before_first_request
-async def on_startup():
-    await bot.set_webhook(WEBHOOK_URL)
+
 
 @app.route("/setwebhook", methods=["GET"])
 def set_webhook():
