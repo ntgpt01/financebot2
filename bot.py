@@ -1,17 +1,3 @@
-# from aiogram import Bot, Dispatcher
-# from aiogram.contrib.fsm_storage.memory import MemoryStorage
-# from aiogram.utils import executor
-# from config import TELEGRAM_TOKEN
-# from handlers import register_handlers
-
-# bot = Bot(token=TELEGRAM_TOKEN)  # ✅ Dùng đúng biến đã import
-# storage = MemoryStorage()
-# dp = Dispatcher(bot, storage=storage)
-
-# register_handlers(dp)
-
-# if __name__ == "__main__":
-#     executor.start_polling(dp, skip_updates=True)
 
 
 # bot.py
@@ -22,9 +8,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Update
 from handlers import register_handlers
 from config import TELEGRAM_TOKEN
-
 from flask import Flask, request
-
+print("✅ Update class from:", Update.__module__)
 bot = Bot(token=TELEGRAM_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
@@ -40,12 +25,7 @@ app = Flask(__name__)
 def index():
     return "FinanceBot is alive!"
 
-# @app.route(WEBHOOK_PATH, methods=["POST"])
-# async def webhook():
-#     request_data = request.get_json()
-#     update = Update(**request_data)
-#     await dp.process_update(update)
-#     return "ok"
+
 from aiogram import types
 from aiogram import Bot, Dispatcher
 
