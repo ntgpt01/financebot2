@@ -107,85 +107,46 @@ async def save_transaction_handler(message: types.Message, state: FSMContext):
 from db import get_transactions, get_accounts
 from aiogram import types
 
+# XÓA đoạn async def fund_report(...) bên trong
+
 async def fund_report(message: types.Message):
     txs = get_transactions()
-
     if not txs:
         await message.answer("📭 Hiện chưa có giao dịch nào.")
         return
 
-    # Tổng thu – chi
     thu = sum(t['amount'] for t in txs if t['type'] == 'Thu')
     chi = sum(t['amount'] for t in txs if t['type'] == 'Chi')
     sodu = thu - chi
 
-    # # Số dư theo từng account
-    # acc_balance = {}
-    # for t in txs:
-    #     acc = t['account']
-    #     amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
-    #     acc_balance[acc] = acc_balance.get(acc, 0) + amt
+    acc_balance = {}
+    for t in txs:
+        acc = t['account']
+        amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
+        acc_balance[acc] = acc_balance.get(acc, 0) + amt
 
-    # # Bắt đầu soạn báo cáo
-    # msg = "📉 <b>Tổng Hợp Thu Chi</b>\n"
-    # msg += "Loại | Số tiền\n"
-    # msg += "========================\n"
-    # msg += f"🟢 Thu  | {thu:,} VNĐ\n"
-    # msg += f"🔴 Chi  | {chi:,} VNĐ\n"
-    # msg += f"💰 Số dư | {sodu:,} VNĐ\n\n"
+    msg = "📉 Tổng Hợp Thu Chi\n"
+    msg += "Loại | Số tiền\n"
+    msg += "-------------------------\n"
+    msg += f"🟢 Thu  | {thu:,} VNĐ\n"
+    msg += f"🔴 Chi  | {chi:,} VNĐ\n"
+    msg += f"💰 Số dư | {sodu:,} VNĐ\n\n"
 
-    # msg += "💼 <b>Số Dư Theo Nguồn Tiền</b>\n"
-    # msg += "========================\n"
-    # for acc, val in acc_balance.items():
-    #     msg += f"🏦 {acc:<10}: 💰 {val:,} VNĐ\n"
+    msg += "💼 Số Dư Theo Nguồn Tiền\n"
+    msg += "-------------------------\n"
+    for acc, val in acc_balance.items():
+        msg += f"🏦 {acc:<6} : 💰 {val:,} VNĐ\n"
 
-    # msg += "\n🧾 <b>Lịch Sử Quỹ:</b>\n"
-    # msg += "========================\n"
-    # msg += "ID | Time     | Type | Amount | Mem\n"
+    msg += "\n🧾 Lịch Sử Quỹ:\n"
+    msg += "-------------------------\n"
+    msg += "ID | Time      | Type | Amount | Mem\n"
+    for i, t in enumerate(txs, 1):
+        icon = "🟢 T" if t["type"] == "Thu" else "🔴 C"
+        msg += f"{i:02} | {t['time']} | {icon} | {t['amount']:,} | 👤 {t['member']}\n"
 
-    # for i, t in enumerate(txs, 1):
-    #     icon = "🟢 T" if t["type"] == "Thu" else "🔴 C"
-    #     msg += f"{i:02} | {t['time']} | {icon} | {t['amount']:,} | 👤 {t['member']}\n"
+    await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
 
-    # await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
-    async def fund_report(message: types.Message):
-        txs = get_transactions()
-        if not txs:
-            await message.answer("📭 Hiện chưa có giao dịch nào.")
-            return
-
-        thu = sum(t['amount'] for t in txs if t['type'] == 'Thu')
-        chi = sum(t['amount'] for t in txs if t['type'] == 'Chi')
-        sodu = thu - chi
-
-        acc_balance = {}
-        for t in txs:
-            acc = t['account']
-            amt = t['amount'] if t['type'] == 'Thu' else -t['amount']
-            acc_balance[acc] = acc_balance.get(acc, 0) + amt
-
-        msg = "📉 Tổng Hợp Thu Chi\n"
-        msg += "Loại | Số tiền\n"
-        msg += "-------------------------\n"
-        msg += f"🟢 Thu  | {thu:,} VNĐ\n"
-        msg += f"🔴 Chi  | {chi:,} VNĐ\n"
-        msg += f"💰 Số dư | {sodu:,} VNĐ\n\n"
-
-        msg += "💼 Số Dư Theo Nguồn Tiền\n"
-        msg += "-------------------------\n"
-        for acc, val in acc_balance.items():
-            msg += f"🏦 {acc:<6} : 💰 {val:,} VNĐ\n"
-
-        msg += "\n🧾 Lịch Sử Quỹ:\n"
-        msg += "-------------------------\n"
-        msg += "ID | Time      | Type | Amount | Mem\n"
-        for i, t in enumerate(txs, 1):
-            icon = "🟢 T" if t["type"] == "Thu" else "🔴 C"
-            msg += f"{i:02} | {t['time']} | {icon} | {t['amount']:,} | 👤 {t['member']}\n"
-
-        await message.answer(f"<code>{msg}</code>", parse_mode="HTML")
-
-
+    
 
 async def add_account_handler(message: types.Message, state: FSMContext):
     name = message.text.strip()
