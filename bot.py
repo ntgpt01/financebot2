@@ -39,7 +39,7 @@ app = Flask(__name__)
 def index():
     return "FinanceBot is alive!"
 
-@app.route(WEBHOOK_PATH, methods=["POST"])
+# @app.route(WEBHOOK_PATH, methods=["POST"])
 # async def webhook():
 #     request_data = request.get_json()
 #     update = Update(**request_data)
@@ -49,16 +49,23 @@ def index():
 def webhook():
     import asyncio
     import json
+    import traceback
+
     try:
-        request_data = request.get_json()
+        if not request.is_json:
+            print("❌ Webhook request is not JSON!")
+            return "❌ Invalid content type", 400
+
+        request_data = request.get_json(force=True)
         print("🔥 Webhook received:", json.dumps(request_data, indent=2))
+
         update = Update(**request_data)
         asyncio.run(dp.process_update(update))
+
         return "✅ Update processed", 200
     except Exception as e:
-        import traceback
-        print("❌ Webhook error:", traceback.format_exc())
-        return f"❌ Error in webhook: {str(e)}", 500
+        print("❌ Webhook error:\n", traceback.format_exc())
+        return "❌ Error: " + str(e), 500
 
 
 @app.route("/setwebhook", methods=["GET"])
@@ -70,7 +77,7 @@ def set_webhook():
     except Exception as e:
         return f"❌ Lỗi khi set webhook: {str(e)}"
 
-print(f"🔑 Telegram token loaded: {TELEGRAM_TOKEN[:10]}...")  # Chỉ in 10 ký tự đầu
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
