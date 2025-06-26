@@ -6,10 +6,10 @@ print("✅ Update class from:", Update.__module__)
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Update
+print("✅ Update class from:", Update.__module__)
 from handlers import register_handlers
 from config import TELEGRAM_TOKEN
 from flask import Flask, request
-print("✅ Update class from:", Update.__module__)
 bot = Bot(token=TELEGRAM_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
