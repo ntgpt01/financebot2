@@ -1,18 +1,20 @@
-
+# utils.py
 import json
+import os
 from datetime import datetime
-from zoneinfo import ZoneInfo  # ✅ CHUẨN giờ theo hệ thống
-import pytz
+import pendulum
+
 FUND_FILE = "data/fund.json"
 
 def load_fund():
-    try:
-        with open(FUND_FILE, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    if not os.path.exists(FUND_FILE):
+        os.makedirs(os.path.dirname(FUND_FILE), exist_ok=True)
         return {"accounts": [], "members": [], "transactions": []}
+    with open(FUND_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def save_fund(data):
+    os.makedirs(os.path.dirname(FUND_FILE), exist_ok=True)  # 🔐 tạo thư mục nếu thiếu
     with open(FUND_FILE, "w", encoding="utf-8") as f:
         f.write('{\n  "accounts": ' + json.dumps(data["accounts"], ensure_ascii=False) + ',\n')
         f.write('  "members": ' + json.dumps(data["members"], ensure_ascii=False) + ',\n')
@@ -23,14 +25,8 @@ def save_fund(data):
             f.write(f"    {line}{comma}\n")
         f.write('  ]\n}')
 
-
-import pendulum
-
 def current_time():
     now = pendulum.now("Asia/Ho_Chi_Minh")
-    formatted = now.format("DD-MM HH:mm")  # ⬅️ định dạng cũ
+    formatted = now.format("DD-MM HH:mm")
     print("✅ current_time:", formatted)
     return formatted
-
-
-
