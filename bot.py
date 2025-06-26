@@ -7,7 +7,8 @@ from flask import Flask, request
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TELEGRAM_TOKEN
-from handlers.handlers import register_handlers
+from bot_handlers.handlers import register_handlers
+
 
 # ✅ Khởi tạo bot & dispatcher
 bot = Bot(token=TELEGRAM_TOKEN)
