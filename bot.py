@@ -1,5 +1,8 @@
 # bot.py
+import sys
 import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import asyncio
 import json
 import traceback
@@ -7,7 +10,7 @@ from flask import Flask, request
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TELEGRAM_TOKEN
-from bot_handlers.handlers import register_handlers
+from start_handler import register_handlers  # ✅ sửa lại đường dẫn
 
 
 # ✅ Khởi tạo bot & dispatcher
