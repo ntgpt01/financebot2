@@ -46,6 +46,9 @@ def index():
 #     update = Update(**request_data)
 #     await dp.process_update(update)
 #     return "ok"
+from aiogram import types
+from aiogram import Bot, Dispatcher
+
 @app.route(WEBHOOK_PATH, methods=["POST"])
 def webhook():
     import asyncio
@@ -53,21 +56,21 @@ def webhook():
     import traceback
 
     try:
-        if not request.is_json:
-            print("❌ Webhook request is not JSON!")
-            return "❌ Invalid content type", 400
-
         request_data = request.get_json(force=True)
         print("🔥 Webhook received:", json.dumps(request_data, indent=2))
+        
+        update = types.Update(**request_data)
 
-        update = Update(**request_data)
+        # ✅ Set current instance để tránh lỗi context
+        Bot.set_current(bot)
+        Dispatcher.set_current(dp)
+
         asyncio.run(dp.process_update(update))
-
         return "✅ Update processed", 200
+
     except Exception as e:
         print("❌ Webhook error:\n", traceback.format_exc())
-        return "❌ Error: " + str(e), 500
-
+        return "❌ Error in webhook", 500
 
 @app.route("/setwebhook", methods=["GET"])
 def set_webhook():
