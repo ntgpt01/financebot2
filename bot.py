@@ -2,11 +2,11 @@
 
 # bot.py
 import os
+from aiogram.types import Update  # ✅ phải đặt trước khi dùng
 print("✅ Update class from:", Update.__module__)
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.types import Update
-print("✅ Update class from:", Update.__module__)
+
 from handlers import register_handlers
 from config import TELEGRAM_TOKEN
 from flask import Flask, request
@@ -20,7 +20,6 @@ WEBHOOK_PATH = f"/{TELEGRAM_TOKEN}"
 WEBHOOK_URL = f"https://financebot2.onrender.com{WEBHOOK_PATH}"
 
 app = Flask(__name__)
-
 @app.route("/", methods=["GET"])
 def index():
     return "FinanceBot is alive!"
