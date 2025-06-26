@@ -1,3 +1,5 @@
+# common.py
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -7,7 +9,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         await message.answer("⚠️ Không có thao tác nào đang diễn ra.")
         return
-    
+
     keyboard = InlineKeyboardMarkup(row_width=2)
     keyboard.add(
         InlineKeyboardButton("✅ Đồng ý huỷ", callback_data="cancel_yes"),
@@ -15,10 +17,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     )
     await message.answer("❓ Bạn có chắc muốn huỷ thao tác hiện tại không?", reply_markup=keyboard)
 
-
 async def confirm_cancel(query: types.CallbackQuery, state: FSMContext):
-    # Không dùng query.answer() → tránh hiệu ứng bong bóng
-    await query.message.edit_reply_markup()  # ❌ Xoá 2 nút xác nhận
+    await query.message.edit_reply_markup()  # ❌ Xoá nút
 
     if query.data == "cancel_yes":
         await state.finish()
