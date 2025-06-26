@@ -68,6 +68,7 @@ def set_webhook():
     except Exception as e:
         return f"❌ Lỗi khi set webhook: {str(e)}"
 
+print(f"🔑 Telegram token loaded: {TELEGRAM_TOKEN[:10]}...")  # Chỉ in 10 ký tự đầu
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
