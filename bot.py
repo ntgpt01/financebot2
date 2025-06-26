@@ -1,15 +1,16 @@
 
-
 # bot.py
 import os
-from aiogram.types import Update  # ✅ phải đặt trước khi dùng
-print("✅ Update class from:", Update.__module__)
+from aiogram.types import Update  # 💡 import trước rồi mới dùng
+
+print("✅ Update class from:", Update.__module__)  # ✅ dùng sau khi đã import
+
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
 from handlers import register_handlers
 from config import TELEGRAM_TOKEN
 from flask import Flask, request
+
 bot = Bot(token=TELEGRAM_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
