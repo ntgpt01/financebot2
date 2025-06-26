@@ -5,10 +5,12 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-DB_URL = os.getenv("DATABASE_URL")
+
+DB_URL = os.getenv("DB_URL")  # nên đảm bảo biến này luôn tồn tại
 
 def connect():
     return psycopg2.connect(DB_URL, cursor_factory=RealDictCursor)
+
 
 def current_time():
     return pendulum.now("Asia/Ho_Chi_Minh").format("DD-MM HH:mm")
