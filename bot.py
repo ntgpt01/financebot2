@@ -49,6 +49,9 @@ def index():
 from aiogram import types
 from aiogram import Bot, Dispatcher
 
+from aiogram import types
+from aiogram import Bot, Dispatcher
+
 @app.route(WEBHOOK_PATH, methods=["POST"])
 def webhook():
     import asyncio
