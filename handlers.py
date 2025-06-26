@@ -3,8 +3,9 @@ from aiogram.types import CallbackQuery
 from features import manage_fund, weekly_report
 from features.weekly_report import show_all_weeks_report
 from features.weekly_report import handle_backup
-# ✅ Định nghĩa trực tiếp start_handler tại đây
+
 async def start_handler(message: types.Message):
+    print("🔥 Đã nhận được lệnh /start")
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     keyboard.add(
         types.InlineKeyboardButton("💰 Quản Lý Quỹ", callback_data="fund_menu"),
