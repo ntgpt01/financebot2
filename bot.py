@@ -16,6 +16,7 @@
 
 # bot.py
 import os
+print("✅ Update class from:", Update.__module__)
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Update
