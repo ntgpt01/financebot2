@@ -47,15 +47,17 @@ def index():
 #     return "ok"
 @app.route(WEBHOOK_PATH, methods=["POST"])
 def webhook():
+    import asyncio
+    import json
     try:
         request_data = request.get_json()
-        print("🔥 Webhook received:", request_data)  # log JSON từ Telegram
+        print("🔥 Webhook received:", json.dumps(request_data, indent=2))
         update = Update(**request_data)
-        import asyncio
         asyncio.run(dp.process_update(update))
         return "✅ Update processed", 200
     except Exception as e:
-        print("❌ Webhook error:", e)
+        import traceback
+        print("❌ Webhook error:", traceback.format_exc())
         return f"❌ Error in webhook: {str(e)}", 500
 
 
