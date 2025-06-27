@@ -227,6 +227,12 @@ async def show_all_weeks_report(query: CallbackQuery):
         lines.append(f"🗓️ {row['week_key']} | {'+' if row['total'] > 0 else ''}{row['total']:,} VNĐ")
 
     await query.message.answer("\n".join(lines), parse_mode="HTML")
+from init_weekly_info import run_init  # 📌 import cái hàm trên
+
+@dp.message_handler(commands="init_weekly_info")
+async def handle_init(message: types.Message):
+    run_init()
+    await message.answer("✅ Đã insert dữ liệu weekly_info vào DB Render!")
 
 def register(dp):
     dp.register_callback_query_handler(weekly_menu, lambda c: c.data == "weekly_menu")
@@ -238,3 +244,5 @@ def register(dp):
     dp.register_message_handler(enter_amount, state=WeeklyReportState.entering_amount)
     dp.register_callback_query_handler(show_history_detail, lambda c: c.data in ["history_this_week", "history_last_week"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
+    dp.register_message_handler(handle_init, commands="init_weekly_info")
+
