@@ -1,4 +1,3 @@
-# weekly_report.py
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -11,6 +10,7 @@ from weekly_db import (
     get_weekly_report,
     get_all_weeks
 )
+import asyncio
 
 # === Danh sách người & rate ===
 info_data = get_weekly_info()
@@ -162,7 +162,12 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
 
     week_key = get_week_key()
     for person, entry in report_data.items():
-        insert_weekly_report(week_key, person, entry["amount"], entry["rate"], entry["tientuan"])
+        # ⚡️ Chạy insert blocking đúng kiểu async-safe
+        await asyncio.get_running_loop().run_in_executor(
+            None,
+            insert_weekly_report,
+            week_key, person, entry["amount"], entry["rate"], entry["tientuan"]
+        )
 
     week_title = f"🗓️ Lịch Sử Tuần {get_week_range()}"
     header = "ID | Name       | Type | Amount"
