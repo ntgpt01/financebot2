@@ -229,10 +229,12 @@ async def show_all_weeks_report(query: CallbackQuery):
     await query.message.answer("\n".join(lines), parse_mode="HTML")
 from init_weekly_info import run_init  # 📌 import cái hàm trên
 
-@dp.message_handler(commands="init_weekly_info")
+from init_weekly_info import run_init
+
 async def handle_init(message: types.Message):
     run_init()
     await message.answer("✅ Đã insert dữ liệu weekly_info vào DB Render!")
+
 
 def register(dp):
     dp.register_callback_query_handler(weekly_menu, lambda c: c.data == "weekly_menu")
