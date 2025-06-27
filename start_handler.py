@@ -1,7 +1,9 @@
 from aiogram import types, Dispatcher
 from aiogram.types import CallbackQuery
 from features import manage_fund, weekly_report
-from features.weekly_report import show_all_weeks_report, handle_backup
+#from features.weekly_report import show_all_weeks_report, handle_backup
+from features.weekly_report import show_all_weeks_report
+
 from common import cancel_handler, confirm_cancel  # ✅ import trực tiếp
 
 async def start_handler(message: types.Message):
