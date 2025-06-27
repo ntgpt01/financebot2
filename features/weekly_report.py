@@ -3,6 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from datetime import datetime, timedelta
+import asyncio
 
 from weekly_db import (
     get_weekly_info,
@@ -10,11 +11,9 @@ from weekly_db import (
     get_weekly_report,
     get_all_weeks
 )
-import asyncio
+from init_weekly_info import run_init
 
-# === Danh sách người & rate ===
-info_data = get_weekly_info()
-members = list(info_data.keys())
+# === Override rate ===
 rate_overrides = {}
 
 # === FSM States ===
@@ -23,7 +22,7 @@ class WeeklyReportState(StatesGroup):
     entering_amount = State()
     adding_member = State()
 
-# === Utils tuần ===
+# === Utils ===
 def get_week_range(date=None):
     if date is None:
         date = datetime.today()
@@ -51,6 +50,11 @@ async def weekly_menu(query: CallbackQuery):
 # === Bắt đầu ===
 async def start_weekly_report(query: CallbackQuery, state: FSMContext):
     await query.answer()
+
+    # ✅ Load từ DB luôn mới
+    info_data = get_weekly_info()
+    members = list(info_data.keys())
+
     await state.update_data(remaining_members=members.copy(), report_data={}, current_person=None)
     await query.message.delete()
     await show_member_buttons(query.message, state)
@@ -102,12 +106,13 @@ async def add_member(message: types.Message, state: FSMContext):
     if not new_name:
         await message.answer("⚠️ Tên không hợp lệ.")
         return
+
     data = await state.get_data()
     remaining = data.get("remaining_members", [])
-    if new_name not in members:
-        members.append(new_name)
+
     if new_name not in remaining:
         remaining.append(new_name)
+
     await state.update_data(current_person=new_name, remaining_members=remaining)
     await message.answer(f"👤 {new_name} (tỷ lệ mặc định 0%)\n💵 Nhập số tiền:")
     await WeeklyReportState.entering_amount.set()
@@ -162,7 +167,6 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
 
     week_key = get_week_key()
     for person, entry in report_data.items():
-        # ⚡️ Chạy insert blocking đúng kiểu async-safe
         await asyncio.get_running_loop().run_in_executor(
             None,
             insert_weekly_report,
@@ -227,15 +231,13 @@ async def show_all_weeks_report(query: CallbackQuery):
         lines.append(f"🗓️ {row['week_key']} | {'+' if row['total'] > 0 else ''}{row['total']:,} VNĐ")
 
     await query.message.answer("\n".join(lines), parse_mode="HTML")
-from init_weekly_info import run_init  # 📌 import cái hàm trên
 
-from init_weekly_info import run_init
-
+# === Init Weekly Info ===
 async def handle_init(message: types.Message):
     run_init()
     await message.answer("✅ Đã insert dữ liệu weekly_info vào DB Render!")
 
-
+# === Register ===
 def register(dp):
     dp.register_callback_query_handler(weekly_menu, lambda c: c.data == "weekly_menu")
     dp.register_callback_query_handler(start_weekly_report, lambda c: c.data == "weekly_start")
@@ -247,4 +249,3 @@ def register(dp):
     dp.register_callback_query_handler(show_history_detail, lambda c: c.data in ["history_this_week", "history_last_week"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
     dp.register_message_handler(handle_init, commands="init_weekly_info")
-
