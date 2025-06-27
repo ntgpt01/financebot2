@@ -22,8 +22,7 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(show_all_weeks_report, commands=["history_all"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
-    dp.register_callback_query_handler(handle_backup, lambda c: c.data == "weekly_backup")
-
+   
     manage_fund.register(dp)
     weekly_report.register(dp)
 
