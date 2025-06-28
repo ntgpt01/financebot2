@@ -1,3 +1,4 @@
+import math
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -5,8 +6,15 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQu
 from datetime import datetime, timedelta
 from weekly_db import get_weekly_info, insert_weekly_report, get_weekly_report, get_all_weeks
 from db import connect
-from init_weekly_info import run_init
 import asyncio
+from init_weekly_info import run_init
+
+# === Hàm làm tròn chuẩn ===
+def ceil_to_nearest_10(n):
+    if n >= 0:
+        return int(math.ceil(n / 10.0)) * 10
+    else:
+        return -int(math.floor(abs(n) / 10.0)) * 10
 
 # === Rate overrides ===
 rate_overrides = {}
@@ -32,6 +40,39 @@ def get_week_key(date=None):
         date = datetime.today()
     monday = date - timedelta(days=date.weekday())
     return monday.strftime("%Y-%m-%d")
+
+# === Nhập số tiền: áp dụng làm tròn ===
+async def enter_amount(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    if data.get("current_person") is None:
+        return await message.answer("⚠️ Bạn chưa chọn người.")
+    try:
+        amount = int(message.text.replace(",", "").replace(".", ""))
+    except:
+        return await message.answer("⚠️ Nhập số không hợp lệ.")
+    person = data["current_person"]
+    info = get_weekly_info()
+    rate = rate_overrides.get(person) or info.get(person, {}).get("rate", 0)
+
+    raw = amount - amount * rate / 100
+    tientuan = ceil_to_nearest_10(raw)
+
+    await message.answer(f"👤 {person}")
+    await message.answer(f"{amount:,.0f} - {rate:.0f}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
+
+    report_data = data.get("report_data", {})
+    report_data[person] = {"amount": amount, "rate": rate, "tientuan": tientuan}
+
+    remaining = data.get("remaining_members", [])
+    if person in remaining:
+        remaining.remove(person)
+
+    await state.update_data(report_data=report_data, remaining_members=remaining, current_person=None)
+
+    if not remaining:
+        await finish_weekly_report(message, state)
+    else:
+        await show_member_buttons(message, state)
 
 # === /init_weekly_info ===
 async def handle_init(message: types.Message):
