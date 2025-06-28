@@ -6,6 +6,14 @@ from datetime import datetime, timedelta
 from weekly_db import get_weekly_info, insert_weekly_report, get_weekly_report, get_all_weeks
 from db import connect
 import asyncio
+from init_weekly_info import run_init  # 📌 import đúng file chứa run_init()
+
+from aiogram import types
+
+@dp.message_handler(commands="init_weekly_info")
+async def handle_init(message: types.Message):
+    run_init()  # chạy hàm insert DB
+    await message.answer("✅ Done init weekly_info.")
 
 # === Rate overrides ===
 rate_overrides = {}
