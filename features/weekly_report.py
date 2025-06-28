@@ -149,27 +149,35 @@ async def add_member_rate(message: types.Message, state: FSMContext):
 # === Nhập số tiền ===
 async def enter_amount(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    if not data.get("current_person"):
+    if data.get("current_person") is None:
         return await message.answer("⚠️ Bạn chưa chọn người.")
     try:
         amount = int(message.text.replace(",", "").replace(".", ""))
     except:
         return await message.answer("⚠️ Nhập số không hợp lệ.")
+
     person = data["current_person"]
     info = get_weekly_info()
     rate = rate_overrides.get(person) or info.get(person, {}).get("rate", 0)
     tientuan = round(amount - amount * rate / 100)
-    await message.answer(f"👤 {person}\n{amount:,} - {rate}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
+
+    # ✅ Tách ra 2 tin riêng biệt
+    await message.answer(f"👤 {person}")
+    await message.answer(f"{amount:,.0f} - {rate:.0f}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
+
     report_data = data.get("report_data", {})
     report_data[person] = {"amount": amount, "rate": rate, "tientuan": tientuan}
+
     remaining = data.get("remaining_members", [])
     if person in remaining:
         remaining.remove(person)
+
     await state.update_data(report_data=report_data, remaining_members=remaining, current_person=None)
     if not remaining:
         await finish_weekly_report(message, state)
     else:
         await show_member_buttons(message, state)
+
 
 # === Kết tuần ===
 async def finish_report_callback(query: CallbackQuery, state: FSMContext):
@@ -186,9 +194,14 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
     if not report_data:
         await message.answer("❌ Không có dữ liệu để lưu.")
         return
+
     week_key = get_week_key()
     for person, entry in report_data.items():
-        await asyncio.get_running_loop().run_in_executor(None, insert_weekly_report, week_key, person, entry["amount"], entry["rate"], entry["tientuan"])
+        await asyncio.get_running_loop().run_in_executor(
+            None, insert_weekly_report,
+            week_key, person, entry["amount"], entry["rate"], entry["tientuan"]
+        )
+
     week_title = f"🗓️ Lịch Sử Tuần {get_week_range()}"
     header = "ID | Name       | Type | Amount"
     lines = []
@@ -196,12 +209,26 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
         icon = "🟢" if entry["tientuan"] > 0 else "🔴"
         label = "Bù" if entry["tientuan"] > 0 else "Thu"
         lines.append(f"{idx:02} | {person:<10} | {icon} {label:<3} | {entry['tientuan']:,} VNĐ")
+
     total_bu = sum(x["tientuan"] for x in report_data.values() if x["tientuan"] > 0)
     total_thu = sum(x["tientuan"] for x in report_data.values() if x["tientuan"] < 0)
     delta = total_bu + total_thu
+
     summary = f"\n\nTổng Kết: 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,} VNĐ"
+
+    # 1️⃣ Gửi bảng tổng hợp
     await message.answer(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + summary + "</pre>", parse_mode="HTML")
+
+    # 2️⃣ Gửi từng người
+    for person, entry in report_data.items():
+        await message.answer(f"👤 {person}")
+        await message.answer(
+            f"{entry['amount']:,.0f} - {entry['rate']:.0f}% ➜ "
+            f"{'Bù' if entry['tientuan'] > 0 else 'Thu'} {entry['tientuan']:,}"
+        )
+
     await state.finish()
+
 
 # === History ===
 async def show_history_menu(query: CallbackQuery):
