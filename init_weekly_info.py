@@ -61,7 +61,7 @@ def run_init():
         ("Ut Khang", "TH04", 60),
     ]
 
-    all_data = th04_data + th01_data + th02_data
+    all_data =  th01_data + th02_data + th04_data
 
     with connect() as conn:
         cur = conn.cursor()
