@@ -45,6 +45,21 @@ def run_init():
         ("Phung D", "TH02", 40),
         ("Tuan(Vani)", "TH02", 30),
     ]
+    th04_data = [
+        ("Khang", "TH04", 40),
+        ("Trung", "TH04", 50),
+        ("TH 001", "TH04", 50),
+        ("TH 002", "TH04", 50),
+        ("TH 003", "TH04", 50),
+        ("TH 004", "TH04", 50),
+        ("TH 005", "TH04", 50),
+        ("TH 006", "TH04", 50),
+        ("Aha Khang", "TH04", 55),
+        ("Dieu(Khang)", "TH04", 55),
+        ("Duy Khang", "TH04", 50),
+        ("Khang Ut 2", "TH04", 50),
+        ("Ut Khang", "TH04", 60),
+    ]
 
     all_data = th04_data + th01_data + th02_data
 
