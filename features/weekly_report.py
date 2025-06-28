@@ -223,7 +223,7 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
     total_thu = sum(x["tientuan"] for x in report_data.values() if x["tientuan"] < 0)
     delta = total_bu + total_thu
 
-    summary = f"\n\nTổng Kết:\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,}"
+    summary = f"\nTổng Kết:\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,}"
 
     # 1️⃣ Gửi bảng tổng hợp
     await message.answer(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + summary + "</pre>", parse_mode="HTML")
@@ -263,7 +263,7 @@ async def show_history_detail(query: CallbackQuery):
     for idx, row in enumerate(rows, 1):
         icon = "🟢" if row["tientuan"] > 0 else "🔴"
         label = "Bù" if row["tientuan"] > 0 else "Thu"
-        lines.append(f"{idx:02} | {row['person']:<10} | {icon} {label:<3} | {row['tientuan']:,} VNĐ")
+        lines.append(f"{idx:02} | {row['person']:<10} | {icon} {label:<3} | {row['tientuan']:,}")
     await query.message.edit_text(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + "</pre>", parse_mode="HTML")
 
 async def show_all_weeks_report(query: CallbackQuery):
