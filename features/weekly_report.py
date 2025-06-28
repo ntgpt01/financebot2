@@ -187,39 +187,6 @@ async def add_member_rate(message: types.Message, state: FSMContext):
     await WeeklyReportState.entering_amount.set()
 
 
-# === Nhập số tiền ===
-async def enter_amount(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    if data.get("current_person") is None:
-        return await message.answer("⚠️ Bạn chưa chọn người.")
-    try:
-        amount = int(message.text.replace(",", "").replace(".", ""))
-    except:
-        return await message.answer("⚠️ Nhập số không hợp lệ.")
-
-    person = data["current_person"]
-    info = get_weekly_info()
-    rate = rate_overrides.get(person) or info.get(person, {}).get("rate", 0)
-    raw = amount - amount * rate / 100
-    tientuan = ceil_to_nearest_10(raw)
-
-
-    # ✅ Tách ra 2 tin riêng biệt
-    await message.answer(f"👤 {person}")
-    await message.answer(f"{amount:,.0f} - {rate:.0f}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
-
-    report_data = data.get("report_data", {})
-    report_data[person] = {"amount": amount, "rate": rate, "tientuan": tientuan}
-
-    remaining = data.get("remaining_members", [])
-    if person in remaining:
-        remaining.remove(person)
-
-    await state.update_data(report_data=report_data, remaining_members=remaining, current_person=None)
-    if not remaining:
-        await finish_weekly_report(message, state)
-    else:
-        await show_member_buttons(message, state)
 
 
 # === Kết tuần ===
@@ -257,7 +224,7 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
     total_thu = sum(x["tientuan"] for x in report_data.values() if x["tientuan"] < 0)
     delta = total_bu + total_thu
 
-    summary = f"\n\nTổng Kết: 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,} VNĐ"
+    summary = f"\n\nTổng Kết:\n\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,} VNĐ"
 
     # 1️⃣ Gửi bảng tổng hợp
     await message.answer(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + summary + "</pre>", parse_mode="HTML")
