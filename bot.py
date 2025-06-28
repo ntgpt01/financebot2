@@ -11,6 +11,8 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TELEGRAM_TOKEN
 from start_handler import register_handlers  # ✅ sửa lại đường dẫn
+from features import weekly_report
+weekly_report.register(dp)
 
 
 # ✅ Khởi tạo bot & dispatcher

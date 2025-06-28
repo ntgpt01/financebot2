@@ -10,7 +10,7 @@ from init_weekly_info import run_init  # 📌 import đúng file chứa run_init
 
 from aiogram import types
 
-@dp.message_handler(commands="init_weekly_info")
+
 async def handle_init(message: types.Message):
     run_init()  # chạy hàm insert DB
     await message.answer("✅ Done init weekly_info.")
@@ -251,3 +251,5 @@ def register(dp):
     dp.register_callback_query_handler(finish_report_callback, lambda c: c.data == "finish_report", state=WeeklyReportState.choosing_person)
     dp.register_callback_query_handler(show_history_detail, lambda c: c.data in ["history_this_week", "history_last_week"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
+    dp.register_message_handler(handle_init, commands="init_weekly_info")
+
