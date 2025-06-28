@@ -1,4 +1,4 @@
-from db import connect
+from db import connect  # hoặc from weekly_db import connect
 
 def run_init():
     th04_data = [
@@ -57,6 +57,6 @@ def run_init():
                 ON CONFLICT (name) DO UPDATE 
                 SET group_master = EXCLUDED.group_master,
                     rate = EXCLUDED.rate
-            """, (name.strip(), group_master.strip(), rate))
+            """, (name, group_master, rate))
         conn.commit()
-    print("✅ Done: weekly_info synced cleanly.")
+    print("✅ Done init DB (Auto Update)")
