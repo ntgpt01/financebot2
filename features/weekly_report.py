@@ -95,31 +95,39 @@ async def handle_add_member_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
     await query.message.answer("✏️ Gõ tên thành viên mới:")
     await WeeklyReportState.adding_member_name.set()
+GROUP_CHOICES = ["TH01", "TH02", "TH04"]
 
 async def add_member_name(message: types.Message, state: FSMContext):
     name = message.text.strip()
     if not name:
         await message.answer("⚠️ Tên không hợp lệ.")
         return
+
     await state.update_data(new_member_name=name)
-    await message.answer(f"📌 Nhập group_master cho **{name}**:")
+
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    for grp in GROUP_CHOICES:
+        keyboard.add(InlineKeyboardButton(grp, callback_data=f"group_{grp}"))
+
+    await message.answer(f"📌 Chọn group_master cho **{name}**:", reply_markup=keyboard)
     await WeeklyReportState.adding_member_group.set()
-
-async def add_member_group(message: types.Message, state: FSMContext):
-    group = message.text.strip().upper()
+async def add_member_group_cb(query: CallbackQuery, state: FSMContext):
+    await query.answer()
+    group = query.data.split("group_")[-1]
     await state.update_data(new_member_group=group)
-    await message.answer(f"💯 Nhập rate (%) cho nhóm **{group}**:")
+    await query.message.answer(f"💯 Nhập rate (%) cho nhóm **{group}**:")
     await WeeklyReportState.adding_member_rate.set()
-
 async def add_member_rate(message: types.Message, state: FSMContext):
     try:
         rate = int(message.text.strip())
     except:
         await message.answer("⚠️ Rate không hợp lệ.")
         return
+
     data = await state.get_data()
     name = data["new_member_name"]
     group = data["new_member_group"]
+
     with connect() as conn:
         cur = conn.cursor()
         cur.execute("""
@@ -128,12 +136,15 @@ async def add_member_rate(message: types.Message, state: FSMContext):
             ON CONFLICT DO NOTHING
         """, (name, group, rate))
         conn.commit()
+
     remaining = data.get("remaining_members", [])
     remaining.append(name)
     rate_overrides[name] = rate
+
     await state.update_data(current_person=name, remaining_members=remaining, current_rate=rate)
     await message.answer(f"✅ Đã thêm **{name}** ({group} - {rate}%)\n💵 Nhập số tiền:")
     await WeeklyReportState.entering_amount.set()
+
 
 # === Nhập số tiền ===
 async def enter_amount(message: types.Message, state: FSMContext):
@@ -232,16 +243,27 @@ async def show_all_weeks_report(query: CallbackQuery):
 
 # === Register ===
 def register(dp):
+    # Khởi tạo DB
     dp.register_message_handler(handle_init, commands="init_weekly_info")
+
+    # Menu chính
     dp.register_callback_query_handler(weekly_menu, lambda c: c.data == "weekly_menu")
     dp.register_callback_query_handler(start_weekly_report, lambda c: c.data == "weekly_start")
     dp.register_callback_query_handler(show_history_menu, lambda c: c.data == "weekly_history")
+
+    # Chọn người & nhập số tiền
     dp.register_callback_query_handler(handle_choose_person, lambda c: c.data.startswith("choose_"), state=WeeklyReportState.choosing_person)
+    dp.register_message_handler(enter_amount, state=WeeklyReportState.entering_amount)
+
+    # Thêm người mới
     dp.register_callback_query_handler(handle_add_member_callback, lambda c: c.data == "add_member", state=WeeklyReportState.choosing_person)
     dp.register_message_handler(add_member_name, state=WeeklyReportState.adding_member_name)
-    dp.register_message_handler(add_member_group, state=WeeklyReportState.adding_member_group)
+    dp.register_callback_query_handler(add_member_group_cb, lambda c: c.data.startswith("group_"), state=WeeklyReportState.adding_member_group)
     dp.register_message_handler(add_member_rate, state=WeeklyReportState.adding_member_rate)
-    dp.register_message_handler(enter_amount, state=WeeklyReportState.entering_amount)
+
+    # Kết thúc
     dp.register_callback_query_handler(finish_report_callback, lambda c: c.data == "finish_report", state=WeeklyReportState.choosing_person)
+
+    # History
     dp.register_callback_query_handler(show_history_detail, lambda c: c.data in ["history_this_week", "history_last_week"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
