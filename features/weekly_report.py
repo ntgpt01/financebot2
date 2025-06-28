@@ -188,7 +188,6 @@ async def add_member_rate(message: types.Message, state: FSMContext):
 
 
 
-
 # === Kết tuần ===
 async def finish_report_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
@@ -224,16 +223,16 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
     total_thu = sum(x["tientuan"] for x in report_data.values() if x["tientuan"] < 0)
     delta = total_bu + total_thu
 
-    summary = f"\n\nTổng Kết:\n\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,} VNĐ"
+    summary = f"\n\nTổng Kết:\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,}"
 
     # 1️⃣ Gửi bảng tổng hợp
     await message.answer(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + summary + "</pre>", parse_mode="HTML")
 
     # 2️⃣ Gửi từng người
     for person, entry in report_data.items():
-        await message.answer(f"👤 {person}")
+        await message.answer(f"👤 {person}\n")
         await message.answer(
-            f"{entry['amount']:,.0f} - {entry['rate']:.0f}% ➜ "
+            f"{entry['amount']:,.0f} - {entry['rate']:.0f}%  "
             f"{'Bù' if entry['tientuan'] > 0 else 'Thu'} {entry['tientuan']:,}"
         )
 
