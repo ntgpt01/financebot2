@@ -5,15 +5,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQu
 from datetime import datetime, timedelta
 from weekly_db import get_weekly_info, insert_weekly_report, get_weekly_report, get_all_weeks
 from db import connect
+from init_weekly_info import run_init
 import asyncio
-from init_weekly_info import run_init  # 📌 import đúng file chứa run_init()
-
-from aiogram import types
-
-
-async def handle_init(message: types.Message):
-    run_init()  # chạy hàm insert DB
-    await message.answer("✅ Done init weekly_info.")
 
 # === Rate overrides ===
 rate_overrides = {}
@@ -40,6 +33,11 @@ def get_week_key(date=None):
     monday = date - timedelta(days=date.weekday())
     return monday.strftime("%Y-%m-%d")
 
+# === /init_weekly_info ===
+async def handle_init(message: types.Message):
+    run_init()
+    await message.answer("✅ Done init weekly_info.")
+
 # === Menu ===
 async def weekly_menu(query: CallbackQuery):
     await query.answer()
@@ -62,9 +60,9 @@ async def start_weekly_report(query: CallbackQuery, state: FSMContext):
 
 async def show_member_buttons(message, state: FSMContext):
     data = await state.get_data()
-    remaining_members = data.get("remaining_members", [])
+    remaining = data.get("remaining_members", [])
     keyboard = InlineKeyboardMarkup(row_width=3)
-    buttons = [InlineKeyboardButton(name, callback_data=f"choose_{name}") for name in remaining_members]
+    buttons = [InlineKeyboardButton(name, callback_data=f"choose_{name}") for name in remaining]
     for i in range(0, len(buttons), 3):
         keyboard.row(*buttons[i:i+3])
     keyboard.add(
@@ -79,8 +77,7 @@ async def handle_choose_person(query: CallbackQuery, state: FSMContext):
     await query.answer()
     name = query.data.split("choose_")[-1]
     await state.update_data(current_person=name)
-    data = await state.get_data()
-    last_msg_id = data.get("last_member_message_id")
+    last_msg_id = (await state.get_data()).get("last_member_message_id")
     if last_msg_id:
         try:
             await query.bot.delete_message(query.message.chat.id, last_msg_id)
@@ -141,7 +138,7 @@ async def add_member_rate(message: types.Message, state: FSMContext):
 # === Nhập số tiền ===
 async def enter_amount(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    if data.get("current_person") is None:
+    if not data.get("current_person"):
         return await message.answer("⚠️ Bạn chưa chọn người.")
     try:
         amount = int(message.text.replace(",", "").replace(".", ""))
@@ -151,8 +148,7 @@ async def enter_amount(message: types.Message, state: FSMContext):
     info = get_weekly_info()
     rate = rate_overrides.get(person) or info.get(person, {}).get("rate", 0)
     tientuan = round(amount - amount * rate / 100)
-    await message.answer(f"👤 {person}")
-    await message.answer(f"{amount:,.0f} - {rate:.0f}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
+    await message.answer(f"👤 {person}\n{amount:,} - {rate}% ➜ {'Bù' if tientuan > 0 else 'Thu'} {tientuan:,}")
     report_data = data.get("report_data", {})
     report_data[person] = {"amount": amount, "rate": rate, "tientuan": tientuan}
     remaining = data.get("remaining_members", [])
@@ -167,8 +163,7 @@ async def enter_amount(message: types.Message, state: FSMContext):
 # === Kết tuần ===
 async def finish_report_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
-    data = await state.get_data()
-    if not data.get("report_data"):
+    if not (await state.get_data()).get("report_data"):
         await query.message.answer("⚠️ Chưa nhập dữ liệu.")
         return
     await query.message.delete()
@@ -182,9 +177,7 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
         return
     week_key = get_week_key()
     for person, entry in report_data.items():
-        await asyncio.get_running_loop().run_in_executor(
-            None, insert_weekly_report, week_key, person, entry["amount"], entry["rate"], entry["tientuan"]
-        )
+        await asyncio.get_running_loop().run_in_executor(None, insert_weekly_report, week_key, person, entry["amount"], entry["rate"], entry["tientuan"])
     week_title = f"🗓️ Lịch Sử Tuần {get_week_range()}"
     header = "ID | Name       | Type | Amount"
     lines = []
@@ -239,6 +232,7 @@ async def show_all_weeks_report(query: CallbackQuery):
 
 # === Register ===
 def register(dp):
+    dp.register_message_handler(handle_init, commands="init_weekly_info")
     dp.register_callback_query_handler(weekly_menu, lambda c: c.data == "weekly_menu")
     dp.register_callback_query_handler(start_weekly_report, lambda c: c.data == "weekly_start")
     dp.register_callback_query_handler(show_history_menu, lambda c: c.data == "weekly_history")
@@ -251,5 +245,3 @@ def register(dp):
     dp.register_callback_query_handler(finish_report_callback, lambda c: c.data == "finish_report", state=WeeklyReportState.choosing_person)
     dp.register_callback_query_handler(show_history_detail, lambda c: c.data in ["history_this_week", "history_last_week"])
     dp.register_callback_query_handler(show_all_weeks_report, lambda c: c.data == "weekly_all_history")
-    dp.register_message_handler(handle_init, commands="init_weekly_info")
-
