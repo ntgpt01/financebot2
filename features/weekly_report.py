@@ -200,7 +200,9 @@ async def enter_amount(message: types.Message, state: FSMContext):
     person = data["current_person"]
     info = get_weekly_info()
     rate = rate_overrides.get(person) or info.get(person, {}).get("rate", 0)
-    tientuan = round(amount - amount * rate / 100)
+    raw = amount - amount * rate / 100
+    tientuan = ceil_to_nearest_10(raw)
+
 
     # ✅ Tách ra 2 tin riêng biệt
     await message.answer(f"👤 {person}")
