@@ -85,8 +85,7 @@ async def weekly_menu(query: CallbackQuery):
     keyboard = InlineKeyboardMarkup(row_width=2)
     keyboard.add(
         InlineKeyboardButton("📝 Kết Tuần", callback_data="weekly_start"),
-        InlineKeyboardButton("📅 History", callback_data="weekly_history"),
-        InlineKeyboardButton("📂 Tất cả các tuần", callback_data="weekly_all_history")
+        InlineKeyboardButton("📅 History", callback_data="weekly_history")
     )
     await query.message.edit_text("📊 Báo Cáo Tuần gồm:", reply_markup=keyboard)
 
