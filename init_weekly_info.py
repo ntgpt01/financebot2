@@ -54,7 +54,7 @@ def run_init():
     ]
 
     # === Master + TH04 + TH02 + TH01 ===
-    all_data = master_data + th04_data + th02_data + th01_data
+    all_data = master_data + th01_data + th02_data + th04_data
 
     with connect() as conn:
         cur = conn.cursor()
