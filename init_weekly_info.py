@@ -10,7 +10,7 @@ def run_init():
     ]
 
     th01_data = [
-        ("Atha", "TH01", 10),
+        ("Atha", "TH01", 0),
         ("Bi", "TH01", 0),
         ("Thuy", "TH01", 0),
         ("Vk Gau", "TH01", 0),
@@ -26,6 +26,7 @@ def run_init():
     th02_data = [
         ("Tuan(Vani)", "TH02", 30),
         ("Phung D", "TH02", 40),
+        ("A6.5", "TH02", 20),
         ("A6.3", "TH02", 40),
         ("A6.2", "TH02", 40),
         ("A6.usa", "TH02", 40),
