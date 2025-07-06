@@ -9,12 +9,20 @@ from db import connect
 import asyncio
 from init_weekly_info import run_init
 
-# === Hàm làm tròn chuẩn ===
-def ceil_to_nearest_10(n):
-    if n >= 0:
-        return int(math.ceil(n / 10.0)) * 10
+# === Hàm MROUND chuẩn Google Sheets ===
+def mround(number, multiple=10):
+    if multiple == 0:
+        return 0
+    remainder = abs(number) % multiple
+    if remainder >= multiple / 2:
+        rounded = abs(number) + (multiple - remainder)
     else:
-        return -int(math.floor(abs(n) / 10.0)) * 10
+        rounded = abs(number) - remainder
+    return rounded if number >= 0 else -rounded
+
+# === Hàm làm tròn: dùng MROUND ===
+def ceil_to_nearest_10(n):
+    return mround(n, 10)
 
 # === Rate overrides ===
 rate_overrides = {}
@@ -135,6 +143,7 @@ async def handle_add_member_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
     await query.message.answer("✏️ Gõ tên thành viên mới:")
     await WeeklyReportState.adding_member_name.set()
+
 GROUP_CHOICES = ["TH01", "TH02", "TH04"]
 
 async def add_member_name(message: types.Message, state: FSMContext):
@@ -151,12 +160,14 @@ async def add_member_name(message: types.Message, state: FSMContext):
 
     await message.answer(f"📌 Chọn group_master cho **{name}**:", reply_markup=keyboard)
     await WeeklyReportState.adding_member_group.set()
+
 async def add_member_group_cb(query: CallbackQuery, state: FSMContext):
     await query.answer()
     group = query.data.split("group_")[-1]
     await state.update_data(new_member_group=group)
     await query.message.answer(f"💯 Nhập rate (%) cho nhóm **{group}**:")
     await WeeklyReportState.adding_member_rate.set()
+
 async def add_member_rate(message: types.Message, state: FSMContext):
     try:
         rate = int(message.text.strip())
@@ -184,8 +195,6 @@ async def add_member_rate(message: types.Message, state: FSMContext):
     await state.update_data(current_person=name, remaining_members=remaining, current_rate=rate)
     await message.answer(f"✅ Đã thêm **{name}** ({group} - {rate}%)\n💵 Nhập số tiền:")
     await WeeklyReportState.entering_amount.set()
-
-
 
 # === Kết tuần ===
 async def finish_report_callback(query: CallbackQuery, state: FSMContext):
@@ -236,7 +245,6 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
         )
 
     await state.finish()
-
 
 # === History ===
 async def show_history_menu(query: CallbackQuery):
