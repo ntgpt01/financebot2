@@ -233,6 +233,10 @@ async def finish_weekly_report(message: types.Message, state: FSMContext):
 
     summary = f"\nTổng Kết:\n 🔴 Thu {total_thu:,} | 🟢 Bù +{total_bu:,} | ⚖️ Chênh lệch: {'+' if delta >= 0 else ''}{delta:,}"
 
+    # ✅ THÊM PHẦN NÀY
+    report_text = f"{week_title}\n```{header}\n" + "\n".join(lines) + "```\n" + summary
+    await message.answer(report_text, parse_mode="Markdown")
+
     # 1️⃣ Gửi bảng tổng hợp
     await message.answer(f"<pre>{week_title}\n{header}\n" + "\n".join(lines) + summary + "</pre>", parse_mode="HTML")
 

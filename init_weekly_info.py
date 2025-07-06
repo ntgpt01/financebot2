@@ -39,12 +39,13 @@ def run_init():
     ]
 
     th04_data = [
+        ("Aha3 Khang", "TH04", 30),
         ("Ut Khang", "TH04", 60),
         ("Khang Ut 2", "TH04", 50),
         ("Duy Khang", "TH04", 50),
         ("Dieu(Khang)", "TH04", 55),
-        ("Aha Khang", "TH04", 55),
-        ("TH 006", "TH04", 50),
+        ("Aha2 Khang", "TH04", 30),
+        ("Aha Khang", "TH04", 45),
         ("TH 005", "TH04", 50),
         ("TH 004", "TH04", 50),
         ("TH 003", "TH04", 50),
@@ -69,3 +70,4 @@ def run_init():
             """, (name, group_master, rate))
         conn.commit()
     print("✅ Done init DB (Auto Update)")
+
