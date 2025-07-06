@@ -1,7 +1,12 @@
 from db import connect  # hoặc from weekly_db import connect
 
 def run_init():
-    
+
+    # === Bổ sung 2 Master ===
+    master_data = [
+        ("Master 03", "MASTER", 0),
+        ("Master 05", "MASTER", 0),
+    ]
 
     th01_data = [
         ("Atha", "TH01", 10),
@@ -16,7 +21,6 @@ def run_init():
         ("Goem", "TH01", 0),
         ("Co Huong", "TH01", 0),
     ]
-
 
     th02_data = [
         ("Tuan(Vani)", "TH02", 30),
@@ -49,7 +53,8 @@ def run_init():
         ("Khang", "TH04", 40),
     ]
 
-    all_data = th04_data + th02_data + th01_data
+    # === Master + TH04 + TH02 + TH01 ===
+    all_data = master_data + th04_data + th02_data + th01_data
 
     with connect() as conn:
         cur = conn.cursor()
