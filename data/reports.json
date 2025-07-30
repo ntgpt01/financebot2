@@ -1,0 +1,26 @@
+{
+  "2025-06-16": {
+    "TH 004": {
+      "amount": 40000,
+      "rate": 50.0,
+      "tientuan": 20000
+    },
+    "Khang ut2": {
+      "amount": -30000,
+      "rate": 10.0,
+      "tientuan": -27000
+    }
+  },
+  "2025-06-23": {
+    "Khang": {
+      "amount": 10000,
+      "rate": 40,
+      "tientuan": 6000
+    },
+    "Tuan(Vani)": {
+      "amount": -204000,
+      "rate": 30,
+      "tientuan": -142800
+    }
+  }
+}
