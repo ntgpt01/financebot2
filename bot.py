@@ -76,7 +76,11 @@ import traceback
 from flask import Flask, request
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from config import TELEGRAM_TOKEN
+import os
+from dotenv import load_dotenv
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
 from start_handler import register_handlers
 from features import weekly_report
 
